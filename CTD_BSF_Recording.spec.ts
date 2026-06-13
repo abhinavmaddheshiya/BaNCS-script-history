@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { DataBus } from "../../databuss/dataBus";
 
 test('test', async ({ page }) => {
   await page.goto('http://inblrbnc706.india.tcs.com:22420/branchportal/Main.action#!');
@@ -20,7 +21,6 @@ test('test', async ({ page }) => {
   await page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().locator('.fa.fa-navicon').click();
   await page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().getByText('Open Term Deposit').click();
   await page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().locator('#loader').click();
-  await page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().getByRole('textbox', { name: 'Deposit Amount' }).click();
   await page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().getByRole('textbox', { name: 'Deposit Amount' }).fill('100000');
   await page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().getByRole('textbox', { name: 'Period', exact: true }).click();
   await page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().getByRole('textbox', { name: 'Deposit Amount' }).fill('1000001');
@@ -45,15 +45,15 @@ test('test', async ({ page }) => {
   await page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().getByText('Upload Documents').click();
   await page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().locator('.fa.fa-navicon').click();
   await page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().getByLabel('Upload Documents').getByTitle('Upload Documents').click();
-  await page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().getByRole('button', { name: 'Upload File  *' }).click();
-  await page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().getByRole('button', { name: 'Upload File  *' }).setInputFiles('BSF_CTD_REP_01_OUT_GBANKBSFOU_20260513_124108_36517.pdf');
+  await page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().getByRole('button', { name: 'Upload File  *' }).setInputFiles('data/BSF_CTD_REP_01_OUT_GBANKBSFOU_20260513_124108_36517.pdf');
   await page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().getByRole('button', { name: 'Upload', exact: true }).click();
   await expect(page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().getByRole('alert')).toContainText('1064: File is uploaded successfully');
   await page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().getByRole('button', { name: 'OK' }).click();
   await page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().getByRole('button', { name: 'Close' }).click();
-  await expect(page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().locator('#dep_confirmationPage_c_depositReference')).toContainText('store account ref');
+  const depositReference = await page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().locator('#dep_confirmationPage_c_depositReference').textContent();
   await page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().getByRole('button', { name: 'Release' }).click();
-  await expect(page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().getByLabel('Alerts').getByRole('list')).toContainText('store trans -1');
+  const fullMessage = await page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().getByLabel('Alerts').getByRole('list').textContent();
+  const trans = fullMessage?.trim().split(' ').at(-1)?.replace('.', '');
   await page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().getByRole('button', { name: 'OK' }).click();
   await page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().getByTitle('Pool').check();
   await page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().getByRole('button', { name: 'Submit' }).click();
@@ -121,7 +121,7 @@ test('test', async ({ page }) => {
   await page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().locator('#loader').click();
   await page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().locator('div:nth-child(45) > #div-panel-body-section-2 > #div-3').click();
   await page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().getByRole('button', { name: 'Submit' }).click();
-  await expect(page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().getByRole('alert')).toContainText('store trans -1');
+  const trans2 = await page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().getByRole('alert').textContent();
   await page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().getByRole('button', { name: 'OK' }).click();
   await page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().getByTitle('Pool').check();
   await page.locator('iframe[name="frame-100105677-100105677-5"]').contentFrame().getByRole('button', { name: 'Submit' }).click();
@@ -197,4 +197,3 @@ test('test', async ({ page }) => {
   await expect(page.getByRole('alert')).toContainText('Are you sure you want to logout?');
   await page.getByRole('button', { name: 'OK' }).click();
 });
-
